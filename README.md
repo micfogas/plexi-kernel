@@ -1,150 +1,53 @@
-# How do I submit patches to Android Common Kernels
+# Plexi Kernel GKI 2.0 - KMI - android14-6.1-11
 
-1. BEST: Make all of your changes to upstream Linux. If appropriate, backport to the stable releases.
-   These patches will be merged automatically in the corresponding common kernels. If the patch is already
-   in upstream Linux, post a backport of the patch that conforms to the patch requirements below.
-   - Do not send patches upstream that contain only symbol exports. To be considered for upstream Linux,
-additions of `EXPORT_SYMBOL_GPL()` require an in-tree modular driver that uses the symbol -- so include
-the new driver or changes to an existing driver in the same patchset as the export.
-   - When sending patches upstream, the commit message must contain a clear case for why the patch
-is needed and beneficial to the community. Enabling out-of-tree drivers or functionality is not
-not a persuasive case.
+  This is a modified kernel rebased off the google ACK branch `common-android14-6.1`
+  This kernel has been tested and developed for use with Google Pixel Tensor SoC models based on
+    the Exynos fab. Personal testing was performed on a Google Pixel 6 Pro. Please open an issue
+    if you experience any.
 
-2. LESS GOOD: Develop your patches out-of-tree (from an upstream Linux point-of-view). Unless these are
-   fixing an Android-specific bug, these are very unlikely to be accepted unless they have been
-   coordinated with kernel-team@android.com. If you want to proceed, post a patch that conforms to the
-   patch requirements below.
+# Features
 
-# Common Kernel patch requirements
+  - GKI 2.0 kernel KMI compatible with the Pixel 6, 7, 8, and 9 series (include 'a' models)
 
-- All patches must conform to the Linux kernel coding standards and pass `scripts/checkpatch.pl`
-- Patches shall not break gki_defconfig or allmodconfig builds for arm, arm64, x86, x86_64 architectures
-(see  https://source.android.com/setup/build/building-kernels)
-- If the patch is not merged from an upstream branch, the subject must be tagged with the type of patch:
-`UPSTREAM:`, `BACKPORT:`, `FROMGIT:`, `FROMLIST:`, or `ANDROID:`.
-- All patches must have a `Change-Id:` tag (see https://gerrit-review.googlesource.com/Documentation/user-changeid.html)
-- If an Android bug has been assigned, there must be a `Bug:` tag.
-- All patches must have a `Signed-off-by:` tag by the author and the submitter
+  - SukiSU v4.0.0 latest; integrated kernel-level root. Download the manager app or read more:
+      (https://github.com/SukiSU-Ultra/SukiSU-Ultra)
 
-Additional requirements are listed below based on patch type
+  - SUSFS v2.0.0; advanced root-hiding capabilities. Management is support via KernelSU module
+    or directly through the SukiSU manager app
 
-## Requirements for backports from mainline Linux: `UPSTREAM:`, `BACKPORT:`
+  - built entirely with Android Clang/LLVM r547379 (v20.0.0) with LTO-thin and Clang CFI optimizations
 
-- If the patch is a cherry-pick from Linux mainline with no changes at all
-    - tag the patch subject with `UPSTREAM:`.
-    - add upstream commit information with a `(cherry picked from commit ...)` line
-    - Example:
-        - if the upstream commit message is
-```
-        important patch from upstream
+  - SPL (security patch level) `202509`
 
-        This is the detailed description of the important patch
+  - (TODO: add to in-tree; testing successful) bcm4389 WiFi driver rebuilt + monitor-mode firmware!!!
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-```
->- then Joe Smith would upload the patch for the common kernel as
-```
-        UPSTREAM: important patch from upstream
+  - battery life improvements (while still performing better than stock kernel)
 
-        This is the detailed description of the important patch
+  - 
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
+# Flashing Notes:
 
-        Bug: 135791357
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
+  1. Use the latest `platform-tools` from Google (v36+) [HIGHLY RECOMMENDED]
 
-- If the patch requires any changes from the upstream version, tag the patch with `BACKPORT:`
-instead of `UPSTREAM:`.
-    - use the same tags as `UPSTREAM:`
-    - add comments about the changes under the `(cherry picked from commit ...)` line
-    - Example:
-```
-        BACKPORT: important patch from upstream
+  2. Do a test boot before flashing. While in bootloader: `fastboot boot <boot_img>`
 
-        This is the detailed description of the important patch
+  3. Google Implements anti-rollback in the bootloader, which means you can only flash boot images
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
+     that have the same or newer SPL as your device is currently on. For maximum compatibility, I
 
-        Bug: 135791357
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        (cherry picked from commit c31e73121f4c1ec41143423ac6ce3ce6dafdcec1)
-        [joe: Resolved minor conflict in drivers/foo/bar.c ]
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
+     will always match the SPL of the current official stock release. If you are on an older SPL or
 
-## Requirements for other backports: `FROMGIT:`, `FROMLIST:`,
+     aren't sure, you can use `magiskboot unpack <plexi_boot_image>` or download the `Image` file, rename the
 
-- If the patch has been merged into an upstream maintainer tree, but has not yet
-been merged into Linux mainline
-    - tag the patch subject with `FROMGIT:`
-    - add info on where the patch came from as `(cherry picked from commit <sha1> <repo> <branch>)`. This
-must be a stable maintainer branch (not rebased, so don't use `linux-next` for example).
-    - if changes were required, use `BACKPORT: FROMGIT:`
-    - Example:
-        - if the commit message in the maintainer tree is
-```
-        important patch from upstream
+     `Image` to `kernel` and then run `magiskboot repack <current_boot_image>`.
 
-        This is the detailed description of the important patch
+  * [TO-DO] Make a script containing the plexi image that you can easily repack with a single command.
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-```
->- then Joe Smith would upload the patch for the common kernel as
-```
-        FROMGIT: important patch from upstream
-
-        This is the detailed description of the important patch
-
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-
-        Bug: 135791357
-        (cherry picked from commit 878a2fd9de10b03d11d2f622250285c7e63deace
-         https://git.kernel.org/pub/scm/linux/kernel/git/foo/bar.git test-branch)
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
+  * [TO-DO-TOO] Add a feature to `SukiSU Ultra` manager to automagically repack a boot image.
+ 
 
 
-- If the patch has been submitted to LKML, but not accepted into any maintainer tree
-    - tag the patch subject with `FROMLIST:`
-    - add a `Link:` tag with a link to the submittal on lore.kernel.org
-    - add a `Bug:` tag with the Android bug (required for patches not accepted into
-a maintainer tree)
-    - if changes were required, use `BACKPORT: FROMLIST:`
-    - Example:
-```
-        FROMLIST: important patch from upstream
+# UNFINISHED
 
-        This is the detailed description of the important patch
 
-        Signed-off-by: Fred Jones <fred.jones@foo.org>
-
-        Bug: 135791357
-        Link: https://lore.kernel.org/lkml/20190619171517.GA17557@someone.com/
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
-
-## Requirements for Android-specific patches: `ANDROID:`
-
-- If the patch is fixing a bug to Android-specific code
-    - tag the patch subject with `ANDROID:`
-    - add a `Fixes:` tag that cites the patch with the bug
-    - Example:
-```
-        ANDROID: fix android-specific bug in foobar.c
-
-        This is the detailed description of the important fix
-
-        Fixes: 1234abcd2468 ("foobar: add cool feature")
-        Change-Id: I4caaaa566ea080fa148c5e768bb1a0b6f7201c01
-        Signed-off-by: Joe Smith <joe.smith@foo.org>
-```
-
-- If the patch is a new feature
-    - tag the patch subject with `ANDROID:`
-    - add a `Bug:` tag with the Android bug (required for android-specific features)
-
+# END

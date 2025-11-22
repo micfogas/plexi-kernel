@@ -1,0 +1,18 @@
+Plexi Kernel - Extras
+=====================
+
+This directory contains extras that I've added for your convenience. They are:
+   --------------------------
+  name		= descriptions
+    = arch(s)
+  ----------------------------
+
+ + avbroot	- avbroot binary, because yes
+   - x86_64
+
+ + magiskboot/	- contains magiskboot binaries pre-compiled for linux and your device
+   - x86_64, arm64, arm
+
+ + sukisu/	- submobule name: sukisu (https://github.com/SukiSU-Ultra/SukiSU-Ultra)
+		  the KernelSU-based root solution built into my source. here for reference
+   - arm64

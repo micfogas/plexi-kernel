@@ -1,0 +1,76 @@
+name: Build magiskboot
+on:
+  schedule:
+    - cron: 0 0/12 * * *
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+    
+      - name: Setup building environment
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/build_workdir
+          sudo apt update
+          sudo apt upgrade
+          echo "BUILD_TIME=$(TZ=Asia/Shanghai date "+%Y%m%d-%H%M")-UTC+8" >> $GITHUB_ENV
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Build
+        run: |
+          cd $GITHUB_WORKSPACE/build_workdir
+          rm -rf out
+          mkdir out
+          cd out
+          mkdir x86_64
+          mkdir x86
+          mkdir arm64-v8a
+          mkdir armeabi-v7a
+          cd ..
+          git clone --recurse-submodules https://github.com/topjohnwu/Magisk.git magiskboot
+          cd magiskboot
+          chmod +x ./build.py
+          ./build.py ndk
+          ./build.py -v native
+          cp -p ./native/out/x86_64/magiskboot $GITHUB_WORKSPACE/build_workdir/out/x86_64/
+          cp -p ./native/out/x86/magiskboot $GITHUB_WORKSPACE/build_workdir/out/x86/
+          cp -p ./native/out/arm64-v8a/magiskboot $GITHUB_WORKSPACE/build_workdir/out/arm64-v8a/
+          cp -p ./native/out/armeabi-v7a/magiskboot $GITHUB_WORKSPACE/build_workdir/out/armeabi-v7a/
+          
+      - name: Commit files
+        run: |
+          cd $GITHUB_WORKSPACE/build_workdir
+          cp -r ./out $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE
+          rm -rf build_workdir
+          rm -rf ./x86_64 ./x86 ./arm64-v8a ./armeabi-v7a
+          mv -f ./out/* .
+          rm -rf ./out
+          {
+            git config user.name github-actions
+            git config user.email github-actions@github.com
+            git add .
+            git commit -m "$(date "+%Y-%m-%d %H:%M:%S") UTC" -a
+            if [ $? -eq 0 ]; then
+                date >> RunDate.txt
+                git commit -m "$(date "+%Y-%m-%d %H:%M:%S")" -a
+                git push
+            else
+                echo No Update
+            fi
+          } || {
+            echo Execution Failed >RunDate.txt
+            exit 1
+          }
