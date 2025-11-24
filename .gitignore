@@ -5,6 +5,10 @@ build/
 # KSU/SUSFS
 KernelSU/
 susfs4ksu/
+prebuilts/
+
+# image files
+*.img
 
 # Local configuration file (sdk path, etc)
 local.properties
@@ -14,11 +18,10 @@ local.properties
 *.orig
 *.rej
 *.patch
+dotconfig
 
 # Build output
 out-dev/*
-
-# ksu and susfs
 
 # bazel build.config files
 abi_protected.zip
