@@ -1,0 +1,60 @@
+menu "Plexi Custom Patches"
+
+CONFIG PLEXI
+	  bool "Plexi custom patch support"
+	  default y
+	  help
+		Enables the use of plexi-cores custom patches.
+
+		you should choose Y here. This exists for troubleshooting
+		and developer debugging. If you add your own custom patchrs
+		and experience ptoblems building or booting your kernel,
+		you can toggle this option off and recompile to verify
+		whether plexicore's code is conflicting with your code.
+
+config PLEXI_OVERRIDE_MODVER
+	  bool "Allow vendor module checksum mismatch on kernel boot"
+	  depends on PLEXI
+	  default n
+	  help
+		By default, the Linux (and Android) kernels are designed to
+		check module checksums when trying too load kernel modules.
+		
+		Due to the way the Android GKI kernel is designed, this
+		can cause problems when trying to boot a GKI kernel boot
+		image. A warning is still fiven and written to dmesg, but
+		selecting this option forces a return(0);
+
+		If unsure, choose N here. If you encounter issues with
+		the kernel boot image not loading vendor modules from
+		your stock vendor dlkm image, you can choose Y here.
+
+config PLEXI_DISABLE_DIRTY
+	  bool "Disable '-dirty' kernel version tagging"
+	  depends on PLEXI
+	  default y
+	  help
+		Android kernel, like Linux kernel, performs a check during
+		build time against the source git repository. If the wotking tree
+		has been modified and 'git status' shows any changes exist,
+		the kernel is normally built with '-dirty' appended to
+		the kernel version.
+
+		Choosing Y disables that functionality.
+
+#config PLEXI_TEST
+#	  bool "Test option"
+#	  depends on PLEXI && 64BIT
+#	depends on KSU != m
+#	  select PLEXI_TESTT
+#	  default n
+#	  help
+#		This is a test. This is only a test.
+#
+#
+#menu "Plexi Test"
+#	depends on PLEXI_TESTT
+#
+#endmenu
+
+endmenu

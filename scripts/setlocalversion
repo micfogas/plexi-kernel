@@ -90,21 +90,27 @@ scm_version()
 			printf '%s%s' -g "$(echo $head | cut -c1-12)"
 		fi
 
-		# Check for uncommitted changes.
-		# This script must avoid any write attempt to the source tree,
-		# which might be read-only.
-		# You cannot use 'git describe --dirty' because it tries to
-		# create .git/index.lock .
-		# First, with git-status, but --no-optional-locks is only
-		# supported in git >= 2.14, so fall back to git-diff-index if
-		# it fails. Note that git-diff-index does not refresh the
-		# index, so it may give misleading results. See
-		# git-update-index(1), git-diff-index(1), and git-status(1).
-		if {
-			git --no-optional-locks status -uno --porcelain 2>/dev/null ||
-			git diff-index --name-only HEAD
-		} | read dummy; then
-			printf '%s' -dirty
+		# plexi patch 25327.1PK
+     	   	if ! grep -q "^CONFIG_PLEXI_DISABLE_DIRTY=y$" include/config/auto.conf; then
+
+			# Check for uncommitted changes.
+			# This script must avoid any write attempt to the source tree,
+			# which might be read-only.
+			# You cannot use 'git describe --dirty' because it tries to
+			# create .git/index.lock .
+			# First, with git-status, but --no-optional-locks is only
+			# supported in git >= 2.14, so fall back to git-diff-index if
+			# it fails. Note that git-diff-index does not refresh the
+			# index, so it may give misleading results. See
+			# git-update-index(1), git-diff-index(1), and git-status(1).
+
+			if {
+				git --no-optional-locks status -uno --porcelain 2>/dev/null ||
+				git diff-index --name-only HEAD
+			} | read dummy; then
+				printf '%s' -dirty
+			fi
+		# plexi patch 25327.1PK
 		fi
 	fi
 }

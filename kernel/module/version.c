@@ -51,8 +51,13 @@ int check_version(const struct load_info *info,
 	return 1;
 
 bad_version:
+#ifndef CONFIG_PLEXI_OVERRIDE_MODVER // BEGIN PATCH - PLEXI 25327.2PM
 	pr_warn("%s: disagrees about version of symbol %s\n", info->name, symname);
 	return 0;
+#else
+	pr_warn("%s: disagrees about version of symbol %s, but continue\n", info->name, symname);
+	return 1;
+#endif // END PATCH - PLEXI 25327.2PM
 }
 
 int check_modstruct_version(const struct load_info *info,
