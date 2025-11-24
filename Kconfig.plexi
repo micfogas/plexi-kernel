@@ -1,6 +1,6 @@
 menu "Plexi Custom Patches"
 
-CONFIG PLEXI
+config PLEXI
 	  bool "Plexi custom patch support"
 	  default y
 	  help
