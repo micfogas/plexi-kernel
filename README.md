@@ -15,9 +15,9 @@
   - SUSFS v2.0.0; advanced root-hiding capabilities. Management is support via KernelSU module
     or directly through the SukiSU manager app
 
-  - built entirely with Android Clang/LLVM r547379 (v20.0.0) with LTO-thin and Clang CFI optimizations
+  - built entirely with Android Clang/LLVM r522817 (v18.0.1) with LTO-thin and Clang CFI optimizations
 
-  - SPL (security patch level) `202509`
+  - SPL (security patch level) `20251105`
 
   - (TODO: add to in-tree; testing successful) bcm4389 WiFi driver rebuilt + monitor-mode firmware!!!
 
